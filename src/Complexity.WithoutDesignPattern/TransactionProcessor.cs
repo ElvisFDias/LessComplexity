@@ -5,27 +5,48 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Complexity.WithDesignPattern
+namespace Complexity.WithoutDesignPattern
 {
     public class TransactionProcessor
     {
-        private readonly ITransactionStep transactionSteps;
+        private readonly IAccountRepository accountRepository;
+        private readonly ITransactionRepository transactionRepository;
 
-        public TransactionProcessor(ITransactionRepository transactionRepository, IAccountRepository accountRepository)
+        public TransactionProcessor(IAccountRepository accountRepository, ITransactionRepository transactionRepository)
         {
-            this.transactionSteps =
-                new AccountNumberAValidation()
-                .SetNext(new AccountNumberBValidation())
-                .SetNext(new AccountAValidation(accountRepository))
-                .SetNext(new AccountBValidation(accountRepository))
-                .SetNext(new TransactionCountValidation(transactionRepository))
-                .SetNext(new DuplicateTransactionValidation(transactionRepository))
-                .SetNext(new SaveTransaction(transactionRepository));
+            this.accountRepository = accountRepository;
+            this.transactionRepository = transactionRepository;
         }
         public bool Proccess(TransactionAccountRequest request)
         {
-            return transactionSteps.Execute(request);
-                
+            if (request.AccountNumberA <= 0)
+                return false;
+
+            if (request.AccountNumberB <= 0)
+                return false;
+
+            var accountA = accountRepository.Get(request.AccountNumberA);
+            if (accountA == null)
+                return false;
+
+            var accountB = accountRepository.Get(request.AccountNumberB);
+            if (accountB == null)
+                return false;
+
+
+            var lastTransaction = transactionRepository.LatestTransaction(request.AccountNumberA, DateTime.Now.AddHours(-24));
+
+            if (lastTransaction.Count() > 2)
+                return false;
+
+            var duplicateTransaction = transactionRepository.Get(request);
+
+            if (duplicateTransaction != null)
+                return false;
+
+            var result = transactionRepository.Save(request);
+
+            return result;
         }
     }
 }
