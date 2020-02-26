@@ -41,7 +41,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ChainOfResponsibility.cs" />
+    <Compile Include="Steps\AccountAValidation.cs" />
+    <Compile Include="Steps\AccountBValidation.cs" />
+    <Compile Include="Steps\AccountNumberAValidation.cs" />
+    <Compile Include="Steps\AccountNumberBValidation.cs" />
+    <Compile Include="ITransactionStep.cs" />
+    <Compile Include="Steps\DuplicateTransactionValidation.cs" />
+    <Compile Include="Steps\SaveTransaction.cs" />
+    <Compile Include="Steps\TransactionCountValidation.cs" />
     <Compile Include="TransactionProcessor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
